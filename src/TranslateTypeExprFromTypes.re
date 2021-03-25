@@ -10,7 +10,7 @@ let rec removeOption = (~label: Asttypes.arg_label, typeExpr: Types.type_expr) =
   | (Tconstr(Path.Pident(id), [t], _), Optional(lbl))
       when Ident.name(id) == "option" =>
     Some((lbl, t))
-  | (Tconstr(Pdot(Path.Pident(nameSpace), id, _), [t], _), Optional(lbl))
+  | (Tconstr(Pdot(Path.Pident(nameSpace), id), [t], _), Optional(lbl))
       when Ident.name(nameSpace) == "FB" && id == "option" =>
     Some((lbl, t))
   | (Tlink(t), _) => t |> removeOption(~label)
@@ -20,7 +20,7 @@ let rec removeOption = (~label: Asttypes.arg_label, typeExpr: Types.type_expr) =
 let rec pathToList = path =>
   switch (path) {
   | Path.Pident(id) => [id |> Ident.name]
-  | Path.Pdot(p, s, _) => [s, ...p |> pathToList]
+  | Path.Pdot(p, s) => [s, ...p |> pathToList]
   | Path.Papply(_) => []
   };
 
@@ -535,14 +535,14 @@ and translateTypeExprFromTypes_ =
   | Tvar(Some(s)) => {dependencies: [], type_: TypeVar(s)}
 
   | Tconstr(
-      Pdot(Pident({name: "Js"}), "t", _),
+      Pdot(Pident(id), "t"),
       [{desc: Tvar(_) | Tconstr(_)}],
       _,
-    ) =>
+    ) when Ident.name(id) == "Js" =>
     // Preserve some existing uses of Js.t(Obj.t) and Js.t('a).
     translateObjType(Closed, [])
 
-  | Tconstr(Pdot(Pident({name: "Js"}), "t", _), [t], _) =>
+  | Tconstr(Pdot(Pident(id), "t"), [t], _) when Ident.name(id) == "Js" =>
     t
     |> translateTypeExprFromTypes_(
          ~config,
@@ -757,8 +757,8 @@ and signatureToModuleRuntimeRepresentation =
     signature
     |> List.map(signatureItem =>
          switch (signatureItem) {
-         | Types.Sig_value(_id, {val_kind: Val_prim(_)}) => ([], [])
-         | Types.Sig_value(id, {val_type: typeExpr}) =>
+         | Types.Sig_value(_id, {val_kind: Val_prim(_)}, _) => ([], [])
+         | Types.Sig_value(id, {val_type: typeExpr}, _) =>
            let {dependencies, type_} =
              typeExpr
              |> translateTypeExprFromTypes_(
@@ -776,7 +776,7 @@ and signatureToModuleRuntimeRepresentation =
            };
            (dependencies, [field]);
 
-         | Types.Sig_module(id, moduleDeclaration, _recStatus) =>
+         | Types.Sig_module(id, _presence, moduleDeclaration, _recStatus, _visibility) =>
            let typeEnv1 =
              switch (typeEnv |> TypeEnv.getModule(~name=id |> Ident.name)) {
              | Some(typeEnv1) => typeEnv1

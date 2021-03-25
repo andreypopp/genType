@@ -23,11 +23,11 @@ let rec fromPath1 = (~config, ~typeEnv, path: Path.t) =>
       }
     };
 
-  | Pdot(Pident(id), s, _pos)
+  | Pdot(Pident(id), s)
       when id |> ScopedPackage.isGeneratedModule(~config) =>
     External(s |> ScopedPackage.addGeneratedModule(~generatedModule=id))
 
-  | Pdot(p, s, _pos) => Dot(p |> fromPath1(~config, ~typeEnv), s)
+  | Pdot(p, s) => Dot(p |> fromPath1(~config, ~typeEnv), s)
   | Papply(_) =>
     Internal("__Papply_unsupported_genType__" |> ResolvedName.fromString)
   };

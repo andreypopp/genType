@@ -90,7 +90,7 @@ and translateSignatureItemFromTypes =
     )
     : Translation.t =>
   switch (signatureItem) {
-  | Types.Sig_type(id, typeDeclaration, _) => {
+  | Types.Sig_type(id, typeDeclaration, _, _) => {
       importTypes: [],
       codeItems: [],
       typeDeclarations:
@@ -104,7 +104,7 @@ and translateSignatureItemFromTypes =
            ),
     }
 
-  | Types.Sig_module(id, moduleDeclaration, _) =>
+  | Types.Sig_module(id, _presence, moduleDeclaration, _, _) =>
     let moduleItem = Runtime.newModuleItem(~name=id |> Ident.name);
     typeEnv |> TypeEnv.updateModuleItem(~moduleItem);
     moduleDeclaration
@@ -116,7 +116,7 @@ and translateSignatureItemFromTypes =
          ~id,
        );
 
-  | Types.Sig_value(id, {val_attributes, val_loc, val_type}) =>
+  | Types.Sig_value(id, {val_attributes, val_loc, val_type}, _) =>
     let name = id |> Ident.name;
     if (Debug.translation^) {
       Log_.item("Translate Sig Value %s\n", name);

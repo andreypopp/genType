@@ -55,7 +55,7 @@ let tagIsInternLocal = s => s == "internal.local";
 let rec getAttributePayload = (checkText, attributes: Typedtree.attributes) => {
   let rec fromExpr = (expr: Parsetree.expression) =>
     switch (expr) {
-    | {pexp_desc: Pexp_constant(Pconst_string(s, _))} =>
+    | {pexp_desc: Pexp_constant(Pconst_string(s, _, _))} =>
       Some(StringPayload(s))
     | {pexp_desc: Pexp_constant(Pconst_integer(n, _))} =>
       Some(IntPayload(n))
@@ -84,7 +84,7 @@ let rec getAttributePayload = (checkText, attributes: Typedtree.attributes) => {
     };
   switch (attributes) {
   | [] => None
-  | [({Asttypes.txt}, payload), ..._tl] when checkText(txt) =>
+  | [{attr_name: {Asttypes.txt}, attr_payload: payload}, ..._tl] when checkText(txt) =>
     switch (payload) {
     | PStr([]) => Some(UnrecognizedPayload)
     | PStr([{pstr_desc: Pstr_eval(expr, _)}, ..._]) => expr |> fromExpr

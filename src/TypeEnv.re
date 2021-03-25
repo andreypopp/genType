@@ -200,7 +200,7 @@ let rec lookupModuleType = (~path, typeEnv) =>
 let rec pathToList = path =>
   switch (path) {
   | Path.Pident(id) => [id |> Ident.name]
-  | Path.Pdot(p, s, _) => [s, ...p |> pathToList]
+  | Path.Pdot(p, s) => [s, ...p |> pathToList]
   | Path.Papply(_) => []
   };
 

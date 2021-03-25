@@ -43,7 +43,7 @@ let rec translateModuleDeclaration =
           ~typeEnv,
           {md_id, md_type}: Typedtree.module_declaration,
         ) => {
-  let name = md_id |> Ident.name;
+  let name = Option.get(md_id) |> Ident.name;
   if (Debug.translation^) {
     Log_.item("Translate Module Declaration %s\n", name);
   };

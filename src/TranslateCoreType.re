@@ -8,7 +8,7 @@ let removeOption = (~label: Asttypes.arg_label, coreType: Typedtree.core_type) =
       when Ident.name(id) == "option" =>
     Some((lbl, t))
   | (
-      Ttyp_constr(Pdot(Path.Pident(nameSpace), id, _), _, [t]),
+      Ttyp_constr(Pdot(Path.Pident(nameSpace), id), _, [t]),
       Optional(lbl),
     )
       /* This has a different representation in 4.03+ */
@@ -23,32 +23,31 @@ type processVariant = {
   unknowns: list(string),
 };
 
-let processVariant = rowFields => {
-  let rec loop = (~noPayloads, ~payloads, ~unknowns, fields) =>
+let processVariant = (rowFields) => {
+  let rec loop = (~noPayloads, ~payloads, ~unknowns, fields: list(Typedtree.row_field)) =>
     switch (fields) {
     | [
-        Typedtree.Ttag(
+      { rf_desc: Typedtree.Ttag(
           {txt: label},
-          attributes,
           _,
           /* only variants with no payload */ [],
-        ),
+      ), rf_attributes, _ },
         ...otherFields,
       ] =>
       otherFields
       |> loop(
-           ~noPayloads=[(label, attributes), ...noPayloads],
+           ~noPayloads=[(label, rf_attributes), ...noPayloads],
            ~payloads,
            ~unknowns,
          )
-    | [Ttag({txt: label}, attributes, _, [payload]), ...otherFields] =>
+    | [{ rf_desc: Ttag({txt: label}, _, [payload]), rf_attributes, _ }, ...otherFields] =>
       otherFields
       |> loop(
            ~noPayloads,
-           ~payloads=[(label, attributes, payload), ...payloads],
+           ~payloads=[(label, rf_attributes, payload), ...payloads],
            ~unknowns,
          )
-    | [Ttag(_, _, _, [_, _, ..._]) | Tinherit(_), ...otherFields] =>
+    | [{ rf_desc: Ttag(_, _, [_, _, ..._]) | Tinherit(_) }, ...otherFields] =>
       otherFields
       |> loop(~noPayloads, ~payloads, ~unknowns=["Tinherit", ...unknowns])
     | [] => {
@@ -176,14 +175,14 @@ and translateCoreType_ =
        )
 
   | Ttyp_constr(
-      Pdot(Pident({name: "Js"}), "t", _),
+      Pdot(Pident(id), "t"),
       _,
       [{ctyp_desc: Ttyp_constr(_) | Ttyp_var(_)}],
-    ) =>
+    ) when Ident.name(id) == "Js" =>
     // Preserve some existing uses of Js.t(Obj.t) and Js.t('a).
     translateObjType(Closed, [])
 
-  | Ttyp_constr(Pdot(Pident({name: "Js"}), "t", _), _, [t]) =>
+  | Ttyp_constr(Pdot(Pident(id), "t"), _, [t]) when Ident.name(id) == "Js" =>
     t
     |> translateCoreType_(
          ~config,
@@ -193,9 +192,9 @@ and translateCoreType_ =
        )
 
   | Ttyp_object(tObj, closedFlag) =>
-    let getFieldType = objectField =>
-      switch (objectField) {
-      | Typedtree.OTtag({txt: name}, _, t) => (
+    let getFieldType = (objectField: Typedtree.object_field) =>
+      switch (objectField.of_desc) {
+      | Typedtree.OTtag({txt: name}, t) => (
           name,
           name |> Runtime.isMutableObjectField
             ? {dependencies: [], type_: ident("")}

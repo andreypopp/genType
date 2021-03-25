@@ -90,7 +90,7 @@ module Loc = {
   let print_loc = (~normalizedRange, ppf, loc: Location.t) => {
     let (file, _, _) = Location.get_pos_info(loc.loc_start);
     if (file == "//toplevel//") {
-      if (Location.highlight_locations(ppf, [loc])) {
+      if (false/* Location.highlight_locations(ppf, [loc]) */) {
         ();
       } else {
         Format.fprintf(

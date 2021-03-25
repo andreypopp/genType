@@ -222,7 +222,7 @@ let rec translateModuleBinding =
           {mb_id, mb_expr, mb_attributes}: Typedtree.module_binding,
         )
         : Translation.t => {
-  let name = mb_id |> Ident.name;
+  let name = Option.get(mb_id) |> Ident.name;
   if (Debug.translation^) {
     Log_.item("Translate Module Binding %s\n", name);
   };

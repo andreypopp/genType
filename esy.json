@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "@opam/reason": "*",
+    "ocaml": "*",
+    "@opam/merlin": "*"
+  },
+  "resolutions": {
+    "ocaml": "anmonteiro/ocaml#75f22c8"
+  },
+  "installConfig": {
+    "pnp": false
+  }
+}
