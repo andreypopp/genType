@@ -26,7 +26,6 @@ type pkgs = {
 let readDirsFromConfig = (~configSources) => {
   let dirs = ref([]);
   let root = projectRoot^;
-  let (+++) = Filename.concat;
 
   let rec processDir = (~subdirs, dir) => {
     let absDir = dir == "" ? root : root +++ dir;
@@ -171,7 +170,7 @@ let sourcedirsJsonToMap = (~config, ~extensions, ~excludeFile) => {
   |> List.iter(dir =>
        addDir(
          ~dirEmitted=dir,
-         ~dirOnDisk=projectRoot^ +++ dir,
+         ~dirOnDisk=dir,
          ~filter=filterGivenExtension,
          ~map=fileMap,
        )
