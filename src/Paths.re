@@ -123,7 +123,7 @@ let relativePathFromBsLib = fileName =>
     };
     let rec fromLibBs = (~acc, reversedList) =>
       switch (reversedList) {
-      | ["bs", "lib", ..._] => acc
+      | ["default", "_build", ..._] => acc
       | [dir, ...dirs] => fromLibBs(~acc=[dir, ...acc], dirs)
       | [] => [] /* not found */
       };

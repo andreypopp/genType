@@ -1,13 +1,10 @@
 {
   "name": "gentype",
   "dependencies": {
+    "ocaml": "4.12.x",
     "@opam/reason": "*",
-    "ocaml": "*",
     "@opam/merlin": "*",
     "@opam/dune": "*"
-  },
-  "resolutions": {
-    "ocaml": "anmonteiro/ocaml#75f22c8"
   },
   "esy": {
     "build": "dune build -p #{self.name}"

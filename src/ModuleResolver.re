@@ -67,7 +67,7 @@ let readDirsFromConfig = (~configSources) => {
 
 let readSourceDirs = (~configSources) => {
   let sourceDirs =
-    ["lib", "bs", ".sourcedirs.json"]
+    [".melange.eobjs", ".sourcedirs.json"]
     |> List.fold_left((+++), bsbProjectRoot^);
   let dirs = ref([]);
   let pkgs = Hashtbl.create(1);
@@ -180,7 +180,7 @@ let sourcedirsJsonToMap = (~config, ~extensions, ~excludeFile) => {
   |> List.iter(packageName => {
        switch (Hashtbl.find(pkgs, packageName)) {
        | path =>
-         let root = ["lib", "bs"] |> List.fold_left((+++), path);
+         let root = ["_build", "default"] |> List.fold_left((+++), path);
          let filter = fileName =>
            [".cmt", ".cmti"]
            |> List.exists(ext => Filename.check_suffix(fileName, ext));
